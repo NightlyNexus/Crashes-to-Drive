@@ -1,0 +1,27 @@
+apply plugin: 'com.android.application'
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:2.2.2'
+  }
+}
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "24.0.3"
+
+  defaultConfig {
+    applicationId "com.nightlynexus.crashestodrivesample"
+    minSdkVersion 16
+    targetSdkVersion 25
+    versionCode 1
+    versionName "1.0"
+  }
+}
+
+dependencies {
+  compile project(':crashes-to-drive')
+}
