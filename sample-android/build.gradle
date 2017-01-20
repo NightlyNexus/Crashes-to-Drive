@@ -5,13 +5,13 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.2.2'
+    classpath 'com.android.tools.build:gradle:2.2.3'
   }
 }
 
 android {
   compileSdkVersion 25
-  buildToolsVersion "24.0.3"
+  buildToolsVersion "25.0.2"
 
   defaultConfig {
     applicationId "com.nightlynexus.crashestodrivesample"
