@@ -51,12 +51,13 @@ public final class CrashReporter {
     final UncaughtExceptionHandler defaultHandler = Thread.getDefaultUncaughtExceptionHandler();
     Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
       @Override public void uncaughtException(Thread thread, Throwable e) {
-        Throwable cause = e.getCause();
-        while (cause != null) {
-          e = cause;
-          cause = e.getCause();
+        Throwable cause = e;
+        Throwable forward = cause.getCause();
+        while (forward != null) {
+          cause = forward;
+          forward = forward.getCause();
         }
-        crashReporter.addCrash(Crash.create(e));
+        crashReporter.addCrash(Crash.create(cause));
         defaultHandler.uncaughtException(thread, e);
       }
     });
