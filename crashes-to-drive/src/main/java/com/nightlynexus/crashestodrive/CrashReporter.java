@@ -4,7 +4,7 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Rfc3339DateJsonAdapter;
 import com.squareup.tape2.ObjectQueue;
-import java.io.ByteArrayInputStream;
+import com.squareup.tape2.QueueFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,12 +13,12 @@ import java.util.Date;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import okhttp3.OkHttpClient;
+import okio.Buffer;
 import okio.BufferedSink;
-import okio.BufferedSource;
 import okio.Okio;
 
 public final class CrashReporter {
-  private final Lock lock = new ReentrantLock();
+  final Lock lock = new ReentrantLock();
   final ObjectQueue<Crash> queue;
   private final CrashSender sender;
   boolean inFlight;
@@ -41,7 +41,8 @@ public final class CrashReporter {
       JsonAdapter<Crash> adapter) {
     ObjectQueue<Crash> queue;
     try {
-      queue = ObjectQueue.create(file, new CrashConverter(adapter));
+      QueueFile queueFile = new QueueFile.Builder(file).build();
+      queue = ObjectQueue.create(queueFile, new CrashConverter(adapter));
     } catch (IOException e) {
       e.printStackTrace();
       queue = ObjectQueue.createInMemory();
@@ -135,14 +136,13 @@ public final class CrashReporter {
     }
 
     @Override public Crash from(byte[] bytes) throws IOException {
-      BufferedSource source = Okio.buffer(Okio.source(new ByteArrayInputStream(bytes)));
-      return adapter.fromJson(source);
+      return adapter.fromJson(new Buffer().write(bytes));
     }
 
     @Override public void toStream(Crash crash, OutputStream bytes) throws IOException {
       BufferedSink sink = Okio.buffer(Okio.sink(bytes));
       adapter.toJson(sink, crash);
-      sink.emit();
+      sink.close();
     }
   }
 }
